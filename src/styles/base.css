@@ -13,8 +13,8 @@
   --color-bg-overlay-bottom: rgba(18, 26, 38, 0.45);
   --color-bg-highlight: rgba(38, 118, 71, 0.28);
   --color-bg-shadow: rgba(0, 0, 0, 0.42);
-  --bg-photo-startup: url("/assets/img/fields.jpg");
-  --bg-photo-app: url("/assets/img/fields2.jpg");
+  --bg-photo-startup: url("/ps/assets/img/background.jpg");
+  --bg-photo-app: url("/ps/assets/img/background.jpg");
   --font-family-base: "Helvetica Neue", Arial, sans-serif;
 }
 
