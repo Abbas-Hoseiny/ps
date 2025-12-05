@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Shell from '../components/Shell.astro';
+---
+
+<BaseLayout title="Pflanzenschutz">
+  <div data-region="startup"></div>
+  <Shell />
+  
+  <main data-region="main" class="main-content d-none">
+    <div class="container py-4" style="margin-bottom: 60px;">
+      <!-- Calculation Section -->
+      <div id="section-calc" class="content-section" style="display: block;">
+        <div class="section-container">
+          <div data-feature="calculation"></div>
+        </div>
+      </div>
+
+      <!-- Documentation Section -->
+      <div id="section-documentation" class="content-section" style="display: none;">
+        <div class="section-container">
+          <div data-feature="documentation"></div>
+        </div>
+      </div>
+
+      <!-- Import & Merge Section -->
+      <div id="section-import" class="content-section" style="display: none;">
+        <div class="section-container">
+          <div data-feature="import-merge"></div>
+        </div>
+      </div>
+      
+      <!-- Zulassung Section -->
+      <div id="section-zulassung" class="content-section" style="display: none;">
+        <div class="section-container">
+          <div data-feature="zulassung"></div>
+        </div>
+      </div>
+
+      <!-- Lookup Section -->
+      <div id="section-lookup" class="content-section" style="display: none;">
+        <div class="section-container">
+          <div data-feature="lookup"></div>
+        </div>
+      </div>
+
+      <!-- GPS Section -->
+      <div id="section-gps" class="content-section" style="display: none;">
+        <div class="section-container">
+          <div data-feature="gps"></div>
+        </div>
+      </div>
+      
+      <!-- Settings Section -->
+      <div id="section-settings" class="content-section" style="display: none;">
+        <div class="section-container">
+          <div data-feature="settings"></div>
+        </div>
+      </div>
+      
+
+    </div>
+  </main>
+  
+  <style>
+    .main-content {
+      min-height: calc(100vh - 120px);
+      padding-bottom: 60px;
+    }
+    
+    .content-section {
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</BaseLayout>

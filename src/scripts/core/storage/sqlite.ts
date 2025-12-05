@@ -1,0 +1,874 @@
+import type { ArchiveLogEntry, GpsPoint } from "../state";
+
+/**
+ * SQLite Storage Driver
+ * Main thread interface to SQLite Worker
+ */
+
+let worker: Worker | null = null;
+let messageId = 0;
+const DEFAULT_WORKER_TIMEOUT = 30000;
+const LONG_RUNNING_ACTION_TIMEOUTS: Record<string, number> = {
+  importBvlSqlite: 3 * 60 * 1000,
+  importBvlDataset: 2 * 60 * 1000,
+  exportHistoryRange: 60 * 1000,
+  exportDB: 60 * 1000,
+};
+
+type PendingMessage = {
+  resolve: (value: any) => void;
+  reject: (reason?: any) => void;
+  timeoutId: ReturnType<typeof setTimeout> | null;
+};
+
+let pendingMessages = new Map<number, PendingMessage>();
+let fileHandle: any = null;
+let pendingFilePersist: Promise<void> | null = null;
+
+/**
+ * Check if SQLite-WASM is supported
+ */
+export function isSupported(): boolean {
+  // Check for Web Worker, WebAssembly, and preferably OPFS support
+  if (typeof Worker === "undefined" || typeof WebAssembly === "undefined") {
+    return false;
+  }
+
+  // Check if we're in a secure context (required for OPFS)
+  if (typeof window !== "undefined" && !window.isSecureContext) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Call worker method
+ */
+function callWorker(action: string, payload?: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+    if (!worker) {
+      reject(new Error("Worker not initialized"));
+      return;
+    }
+
+    const id = ++messageId;
+    const pending: PendingMessage = { resolve, reject, timeoutId: null };
+    pendingMessages.set(id, pending);
+
+    worker.postMessage({ id, action, payload });
+
+    const timeoutMs =
+      LONG_RUNNING_ACTION_TIMEOUTS[action] ?? DEFAULT_WORKER_TIMEOUT;
+    pending.timeoutId = setTimeout(() => {
+      if (pendingMessages.has(id)) {
+        pendingMessages.delete(id);
+        reject(new Error(`Worker call timeout: ${action}`));
+      }
+    }, timeoutMs);
+  });
+}
+/**
+ * Initialize worker
+ */
+async function initWorker(): Promise<void> {
+  if (worker) {
+    return; // Already initialized
+  }
+
+  try {
+    // Create worker with module type
+    worker = new Worker(new URL("./sqliteWorker.js", import.meta.url), {
+      type: "module",
+    });
+
+    // Handle worker messages
+    worker.onmessage = (event) => {
+      const { id, ok, result, error } = event.data;
+
+      if (pendingMessages.has(id)) {
+        const pending = pendingMessages.get(id)!;
+        pendingMessages.delete(id);
+        if (pending.timeoutId) {
+          clearTimeout(pending.timeoutId);
+        }
+
+        if (ok) {
+          pending.resolve(result);
+        } else {
+          pending.reject(new Error(error || "Worker error"));
+        }
+      }
+    };
+
+    worker.onerror = (error) => {
+      console.error("Worker error:", error);
+    };
+
+    // Initialize database in worker
+    await callWorker("init", {});
+  } catch (error) {
+    console.error("Failed to initialize worker:", error);
+    throw error;
+  }
+}
+
+/**
+ * Create a new database
+ */
+export async function create(
+  initialData: any,
+  suggestedName: string = "pflanzenschutz.sqlite"
+): Promise<{ data: any; context: any }> {
+  if (!isSupported()) {
+    throw new Error("SQLite-WASM is not supported in this browser");
+  }
+
+  await initWorker();
+
+  // Import initial data into SQLite
+  await callWorker("importSnapshot", initialData);
+
+  // Optionally save to file (if File System Access API is available)
+  if (typeof (window as any).showSaveFilePicker === "function") {
+    try {
+      fileHandle = await (window as any).showSaveFilePicker({
+        suggestedName,
+        types: [
+          {
+            description: "SQLite Database",
+            accept: { "application/x-sqlite3": [".sqlite", ".db"] },
+          },
+        ],
+      });
+
+      // Export and save database
+      const exported = await callWorker("exportDB");
+      const writable = await fileHandle.createWritable();
+      await writable.write(new Uint8Array(exported.data));
+      await writable.close();
+    } catch (err) {
+      // User cancelled or error - continue without file handle
+      console.warn("Could not save SQLite file:", err);
+      fileHandle = null;
+    }
+  }
+
+  return { data: initialData, context: { fileHandle } };
+}
+
+/**
+ * Open an existing database
+ */
+export async function open(): Promise<{ data: any; context: any }> {
+  if (!isSupported()) {
+    throw new Error("SQLite-WASM is not supported in this browser");
+  }
+
+  await initWorker();
+
+  // Try to open via File System Access API
+  if (typeof (window as any).showOpenFilePicker === "function") {
+    try {
+      const [handle] = await (window as any).showOpenFilePicker({
+        types: [
+          {
+            description: "SQLite Database or JSON",
+            accept: {
+              "application/x-sqlite3": [".sqlite", ".db"],
+              "application/json": [".json"],
+            },
+          },
+        ],
+      });
+
+      fileHandle = handle;
+      const file = await handle.getFile();
+      const arrayBuffer = await file.arrayBuffer();
+
+      // Check if it's JSON or SQLite by file extension or content
+      if (file.name.endsWith(".json")) {
+        // Import JSON
+        const text = await file.text();
+        const data = JSON.parse(text);
+        await callWorker("importSnapshot", data);
+        return { data, context: { fileHandle } };
+      } else {
+        // Import SQLite binary
+        await callWorker("importDB", arrayBuffer);
+        const data = await callWorker("exportSnapshot");
+        return { data, context: { fileHandle } };
+      }
+    } catch (err) {
+      console.error("Failed to open file:", err);
+      throw err;
+    }
+  } else {
+    throw new Error("File System Access API not available");
+  }
+}
+
+/**
+ * Save current state to database
+ */
+async function persistFileHandleIfNeeded(): Promise<void> {
+  if (!worker || !fileHandle) {
+    return;
+  }
+  if (pendingFilePersist) {
+    await pendingFilePersist;
+    return;
+  }
+  pendingFilePersist = (async () => {
+    try {
+      const exported = await callWorker("exportDB");
+      const bytes = normalizeExportedData(exported?.data);
+      const writable = await fileHandle.createWritable();
+      await writable.write(bytes);
+      await writable.close();
+    } finally {
+      pendingFilePersist = null;
+    }
+  })();
+  await pendingFilePersist;
+}
+
+/**
+ * Persist sqlite changes to disk. Multiple callers share the same pending
+ * promise so batch writes trigger only a single flush.
+ */
+export async function persistSqliteDatabaseFile(): Promise<void> {
+  try {
+    await persistFileHandleIfNeeded();
+  } catch (error) {
+    console.error("SQLite-Datei konnte nicht gespeichert werden", error);
+    throw error;
+  }
+}
+
+function normalizeExportedData(data: unknown): Uint8Array {
+  if (data instanceof Uint8Array) {
+    return data;
+  }
+  if (data instanceof ArrayBuffer) {
+    return new Uint8Array(data);
+  }
+  if (Array.isArray(data)) {
+    return new Uint8Array(data);
+  }
+  if (
+    data &&
+    typeof data === "object" &&
+    "buffer" in data &&
+    (data as { buffer: unknown }).buffer instanceof ArrayBuffer
+  ) {
+    const view = data as {
+      byteOffset?: number;
+      byteLength?: number;
+      buffer: ArrayBuffer;
+    };
+    const offset = typeof view.byteOffset === "number" ? view.byteOffset : 0;
+    const length =
+      typeof view.byteLength === "number"
+        ? view.byteLength
+        : view.buffer.byteLength - offset;
+    return new Uint8Array(view.buffer.slice(offset, offset + length));
+  }
+  throw new Error("Unsupported export format");
+}
+
+export async function save(data: any): Promise<{ context: any }> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+
+  // Update database with new data
+  await callWorker("importSnapshot", data);
+
+  // If we have a file handle, save to file
+  try {
+    await persistFileHandleIfNeeded();
+  } catch (err) {
+    console.error("Failed to save to file:", err);
+  }
+
+  return { context: { fileHandle } };
+}
+
+/**
+ * Get current context
+ */
+export function getContext(): any {
+  return { fileHandle };
+}
+
+/**
+ * Reset and close database
+ */
+export function reset(): void {
+  if (worker) {
+    worker.terminate();
+    worker = null;
+  }
+  pendingMessages.clear();
+  fileHandle = null;
+  messageId = 0;
+}
+
+/**
+ * Execute raw SQL query
+ */
+export async function query(sql: string, params?: any[]): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("query", { sql, params });
+}
+
+/**
+ * Execute multiple SQL statements
+ */
+export async function exec(sql: string): Promise<void> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  await callWorker("exec", { sql });
+}
+
+/**
+ * Export database snapshot
+ */
+export async function exportSnapshot(): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("exportSnapshot");
+}
+
+/**
+ * Import database snapshot
+ */
+export async function importSnapshot(data: any): Promise<void> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  await callWorker("importSnapshot", data);
+}
+
+/**
+ * Export raw database binary
+ */
+export async function exportDB(): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("exportDB");
+}
+
+/**
+ * Import raw database binary
+ */
+export async function importDB(arrayBuffer: ArrayBuffer): Promise<void> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  await callWorker("importDB", arrayBuffer);
+}
+
+export type MediumRecord = {
+  id: string;
+  name: string;
+  unit: string;
+  methodId: string | null;
+  value: number;
+  zulassungsnummer: string | null;
+};
+
+export type MediumListCursor = {
+  rowid: number;
+};
+
+export type MediumListOptions = {
+  cursor?: MediumListCursor | null;
+  limit?: number;
+  pageSize?: number;
+  search?: string;
+  includeTotal?: boolean;
+};
+
+export type MediumListResult = {
+  items: MediumRecord[];
+  nextCursor: MediumListCursor | null;
+  hasMore: boolean;
+  pageSize: number;
+  totalCount?: number;
+};
+
+export type GpsListCursor = {
+  id: string;
+  updatedAt: string;
+  rowid?: number;
+};
+
+export type GpsListOptions = {
+  cursor?: GpsListCursor | null;
+  limit?: number;
+  pageSize?: number;
+  search?: string;
+  includeTotal?: boolean;
+};
+
+export type GpsListResult = {
+  items: GpsPoint[];
+  nextCursor: GpsListCursor | null;
+  hasMore: boolean;
+  pageSize: number;
+  activePointId: string | null;
+  totalCount?: number;
+};
+
+export type HistoryQueryFilters = {
+  startDate?: string;
+  endDate?: string;
+  creator?: string;
+  location?: string;
+  crop?: string;
+  usageType?: string;
+  eppoCode?: string;
+  invekos?: string;
+  bbch?: string;
+  text?: string;
+};
+
+export type HistoryQueryOptions = {
+  page?: number;
+  pageSize?: number;
+  filters?: HistoryQueryFilters;
+  sortDirection?: "asc" | "desc";
+};
+
+export type HistoryQueryResult = {
+  items: any[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+};
+
+export type HistoryCursor = {
+  id: number | string;
+  createdAt: string;
+};
+
+export type HistoryPagedOptions = {
+  cursor?: HistoryCursor | null;
+  pageSize?: number;
+  filters?: HistoryQueryFilters;
+  sortDirection?: "asc" | "desc";
+  includeItems?: boolean;
+  includeTotal?: boolean;
+};
+
+export type HistoryPagedResult = {
+  items: any[];
+  nextCursor: HistoryCursor | null;
+  pageSize: number;
+  sortDirection: "asc" | "desc";
+  hasMore: boolean;
+  totalCount?: number;
+};
+
+export type HistoryRangeExportResult = {
+  entries: any[];
+  historyIds: Array<number | string>;
+};
+
+export type ArchiveLogCursor = {
+  id: string;
+  archivedAt: string;
+};
+
+export type ArchiveLogListOptions = {
+  limit?: number;
+  cursor?: ArchiveLogCursor | null;
+  sortDirection?: "asc" | "desc";
+};
+
+export type ArchiveLogRecord = ArchiveLogEntry & {
+  metadata?: Record<string, unknown> | null;
+};
+
+export type ArchiveLogListResult = {
+  items: ArchiveLogRecord[];
+  nextCursor: ArchiveLogCursor | null;
+  hasMore: boolean;
+  pageSize: number;
+  sortDirection: "asc" | "desc";
+};
+
+export type ArchiveLogInput = Partial<ArchiveLogRecord> & {
+  entryCount?: number;
+};
+
+export async function listMediumsPaged(
+  options: MediumListOptions = {}
+): Promise<MediumListResult> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("listMediumsPaged", options);
+}
+
+export async function listHistoryEntries(
+  options: HistoryQueryOptions = {}
+): Promise<HistoryQueryResult> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("listHistory", options);
+}
+
+export async function listHistoryEntriesPaged(
+  options: HistoryPagedOptions = {}
+): Promise<HistoryPagedResult> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("listHistoryPaged", options);
+}
+
+export type HistoryStreamOptions = HistoryPagedOptions & {
+  chunkSize?: number;
+};
+
+export async function streamHistoryChunk(
+  options: HistoryStreamOptions = {}
+): Promise<HistoryPagedResult> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("streamHistoryChunk", options);
+}
+
+export async function getHistoryEntryById(id: number | string): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("getHistoryEntry", Number(id));
+}
+
+export async function deleteHistoryEntryById(
+  id: number | string
+): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("deleteHistoryEntry", Number(id));
+}
+
+export async function exportHistoryRange(
+  options: {
+    filters?: HistoryQueryFilters;
+    limit?: number;
+    sortDirection?: "asc" | "desc";
+  } = {}
+): Promise<HistoryRangeExportResult> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("exportHistoryRange", options);
+}
+
+export async function deleteHistoryRange(
+  options: {
+    filters?: HistoryQueryFilters;
+  } = {}
+): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("deleteHistoryRange", options);
+}
+
+export async function vacuumDatabase(): Promise<void> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  await callWorker("vacuumDatabase");
+}
+
+export async function setArchiveLogs(logs: any[]): Promise<void> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  await callWorker("setArchiveLogs", { logs });
+}
+
+export async function listArchiveLogs(
+  options: ArchiveLogListOptions = {}
+): Promise<ArchiveLogListResult> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("listArchiveLogs", options);
+}
+
+export async function insertArchiveLog(
+  entry: ArchiveLogInput
+): Promise<ArchiveLogRecord> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("insertArchiveLog", entry);
+}
+
+export async function deleteArchiveLog(
+  id: string
+): Promise<{ success: boolean }> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("deleteArchiveLog", { id });
+}
+
+export async function appendHistoryEntry(entry: any): Promise<{ id: number }> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("appendHistoryEntry", entry);
+}
+
+/**
+ * Import BVL dataset
+ */
+export async function importBvlDataset(dataset: any): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("importBvlDataset", dataset);
+}
+
+export async function importBvlSqlite(
+  data: ArrayBuffer,
+  manifest: any
+): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("importBvlSqlite", { data, manifest });
+}
+
+export async function getBvlMeta(key: string): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("getBvlMeta", key);
+}
+
+export async function setBvlMeta(key: string, value: any): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("setBvlMeta", { key, value });
+}
+
+export async function appendBvlSyncLog(entry: any): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("appendBvlSyncLog", entry);
+}
+
+export async function listBvlSyncLog(options: any = {}): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("listBvlSyncLog", options);
+}
+
+export type ZulassungQueryOptions = {
+  culture?: string | null;
+  pest?: string | null;
+  text?: string;
+  includeExpired?: boolean;
+  page?: number;
+  pageSize?: number;
+  includeTotal?: boolean;
+};
+
+export type ZulassungQueryResult = {
+  items: any[];
+  page: number;
+  pageSize: number;
+  totalCount: number | null;
+  hasMore: boolean;
+};
+
+export async function queryZulassung(
+  params: ZulassungQueryOptions = {}
+): Promise<ZulassungQueryResult> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("queryZulassung", params);
+}
+
+/**
+ * Query BVL data
+ */
+export async function queryBvl(filters: any): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("queryBvl", filters);
+}
+
+/**
+ * Get BVL sync status
+ */
+export async function getBvlSyncStatus(): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("getBvlSyncStatus", {});
+}
+
+/**
+ * List BVL cultures
+ */
+export async function listBvlCultures(options: any = {}): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("listBvlCultures", options);
+}
+
+/**
+ * List BVL Schadorganismen
+ */
+export async function listBvlSchadorg(options: any = {}): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("listBvlSchadorg", options);
+}
+
+/**
+ * Lookup helpers (EPPO / BBCH)
+ */
+export async function importLookupEppo(
+  data: ArrayBuffer | Uint8Array
+): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  const payload = data instanceof Uint8Array ? data : new Uint8Array(data);
+  return await callWorker("importLookupEppo", { data: payload });
+}
+
+export async function importLookupBbch(
+  data: ArrayBuffer | Uint8Array
+): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  const payload = data instanceof Uint8Array ? data : new Uint8Array(data);
+  return await callWorker("importLookupBbch", { data: payload });
+}
+
+export async function searchEppoCodes(
+  params: {
+    query?: string;
+    limit?: number;
+    offset?: number;
+    language?: string;
+  } = {}
+): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("searchEppoCodes", params);
+}
+
+export async function searchBbchStages(
+  params: {
+    query?: string;
+    limit?: number;
+    offset?: number;
+  } = {}
+): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("searchBbchStages", params);
+}
+
+export async function getLookupStats(): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("getLookupStats", {});
+}
+
+export async function listLookupLanguages(): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("listLookupLanguages", {});
+}
+
+export async function listGpsPoints(): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("listGpsPoints");
+}
+
+export async function listGpsPointsPaged(
+  options: GpsListOptions = {}
+): Promise<GpsListResult> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("listGpsPointsPaged", options);
+}
+
+export async function upsertGpsPoint(payload: any): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("upsertGpsPoint", payload);
+}
+
+export async function deleteGpsPoint(payload: any): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("deleteGpsPoint", payload);
+}
+
+export async function setActiveGpsPointId(payload: {
+  id: string | null;
+}): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("setActiveGpsPointId", payload);
+}
+
+export async function getActiveGpsPointId(): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("getActiveGpsPointId");
+}
+
+/**
+ * Diagnose BVL schema
+ */
+export async function diagnoseBvlSchema(): Promise<any> {
+  if (!worker) {
+    throw new Error("Database not initialized");
+  }
+  return await callWorker("diagnoseBvlSchema", {});
+}

@@ -1,0 +1,154 @@
+---
+// Shell component - Navigation and Footer
+---
+
+<div data-region="shell" class="d-none">
+  <nav class="navbar navbar-dark bg-dark navbar-expand-lg mb-4 no-print">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#" id="brand-link">
+        <i class="bi bi-leaf-fill"></i>
+        <div class="brand-copy d-flex flex-column">
+          <span class="brand-title" id="brand-title">Pflanzenschutz</span>
+          <span class="brand-tagline small text-muted" id="brand-tagline"></span>
+        </div>
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <button class="btn btn-outline-light nav-btn" data-section="calc">
+              <i class="bi bi-calculator"></i> Berechnung
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-outline-light nav-btn" data-section="documentation">
+              <i class="bi bi-journal-text"></i> Dokumentation
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-outline-light nav-btn" data-section="import">
+              <i class="bi bi-cloud-upload"></i> Import & Merge
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-outline-light nav-btn" data-section="zulassung">
+              <i class="bi bi-file-text"></i> Zulassung
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-outline-light nav-btn" data-section="lookup">
+              <i class="bi bi-search"></i> Lookup
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-outline-light nav-btn" data-section="gps">
+              <i class="bi bi-geo-alt"></i> GPS
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-outline-light nav-btn" data-section="settings">
+              <i class="bi bi-gear"></i> Einstellungen
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<footer data-region="footer" class="footer bg-dark text-light py-2 no-print d-none">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col">
+        <small class="text-muted">
+          © 2025 Pflanzenschutzliste ·
+          <a
+            href="https://github.com/Abbas-Hoseiny/pestalozzi"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-reset text-decoration-underline d-inline-flex align-items-center gap-1"
+          >
+            <i class="bi bi-github" aria-hidden="true"></i>
+            <span>GitHub</span>
+          </a>
+        </small>
+      </div>
+      <div class="col text-end">
+        <small id="app-version" class="text-muted"></small>
+        <button
+          type="button"
+          class="monitor-toggle"
+          data-action="debug-overlay-toggle"
+          title="Performance Monitor aktivieren"
+        >
+          <i class="bi bi-activity"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .nav-btn {
+    margin: 0 0.25rem;
+    border-radius: 0.375rem;
+  }
+  
+  .nav-btn.active {
+    background-color: var(--color-accent, #2f9e44);
+    border-color: var(--color-accent, #2f9e44);
+    color: white;
+  }
+  
+  .footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+  }
+  
+  .brand-logo {
+    max-height: 40px;
+    max-width: 40px;
+  }
+
+  .monitor-toggle {
+    margin-left: 0.5rem;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.75);
+    border-radius: 999px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .monitor-toggle:hover,
+  .monitor-toggle[data-active="true"] {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+  }
+  
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+  }
+</style>
