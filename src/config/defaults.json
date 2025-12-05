@@ -2,11 +2,11 @@
   "meta": {
     "version": 1,
     "company": {
-      "name": "Pestalozzi Gärtnerei",
-      "headline": "Bio Pflanzenschutz",
-      "logoUrl": "/assets/img/pestalozzi-logo.png",
-      "contactEmail": "",
-      "address": "Pestalozzi Gärtnerei\nPestalozzi-Kinderdorf 1\n78333 Stockach-Wahlwies"
+      "name": "Peter Stader Jungpflanzen GmbH",
+      "headline": "Pflanzenschutz",
+      "logoUrl": "/ps/assets/img/logo-peter-stader.png",
+      "contactEmail": "info@peterstader.de",
+      "address": "Peter Stader Jungpflanzen GmbH\nGöldern 20\n78479 Reichenau"
     },
     "defaults": {
       "waterPerHaL": 500,

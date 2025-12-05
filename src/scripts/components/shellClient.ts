@@ -33,6 +33,8 @@ function initShell(): void {
   subscribeState((state) => {
     const brandTitle = document.getElementById("brand-title");
     const brandTagline = document.getElementById("brand-tagline");
+    const brandLogo = document.getElementById("brand-logo") as HTMLImageElement | null;
+    const brandIcon = document.getElementById("brand-icon");
     const appVersion = document.getElementById("app-version");
 
     if (brandTitle && state.company.name) {
@@ -41,6 +43,19 @@ function initShell(): void {
     if (brandTagline && state.company.headline) {
       brandTagline.textContent = state.company.headline;
     }
+    
+    // Logo anzeigen wenn vorhanden, sonst Icon
+    if (brandLogo && brandIcon) {
+      if (state.company.logoUrl) {
+        brandLogo.src = state.company.logoUrl;
+        brandLogo.classList.remove("d-none");
+        brandIcon.classList.add("d-none");
+      } else {
+        brandLogo.classList.add("d-none");
+        brandIcon.classList.remove("d-none");
+      }
+    }
+    
     if (appVersion && state.app.version) {
       appVersion.textContent = `v${state.app.version}`;
     }
