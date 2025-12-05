@@ -189,12 +189,10 @@ function toDateBoundaryIso(
 }
 
 function getDefaultFilters(): DocumentationFilters {
-  const end = new Date();
-  const start = new Date(end);
-  start.setDate(start.getDate() - 30);
+  // Lite-Version: Keine Datumsfilter standardmäßig - zeigt alle Einträge
   return {
-    startDate: formatDateInputValue(start),
-    endDate: formatDateInputValue(end),
+    startDate: "",
+    endDate: "",
   };
 }
 
