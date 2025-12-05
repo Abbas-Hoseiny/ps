@@ -4,19 +4,19 @@ Eine **schlanke Version** der Pflanzenschutz-Web-App, optimiert für ältere und
 
 ## 🚀 Was ist anders in der Lite-Version?
 
-| Feature | Full-Version | Lite-Version |
-|---------|--------------|--------------|
-| Berechnungs-Modul | ✅ | ✅ |
-| Historie | ✅ | ✅ |
-| Dokumentation | ✅ | ✅ |
-| GPS-Verwaltung | ✅ | ✅ |
-| Import/Merge | ✅ | ✅ |
-| Einstellungen | ✅ | ✅ |
-| Auswertung | ✅ | ✅ |
-| **Zulassungs-Suche (BVL)** | ✅ | ❌ |
-| **EPPO/BBCH-Lookup** | ✅ | ❌ |
-| **BVL-Sync** | ✅ | ❌ |
-| **Starfield-Animation** | ❌ | ❌ |
+| Feature                    | Full-Version | Lite-Version |
+| -------------------------- | ------------ | ------------ |
+| Berechnungs-Modul          | ✅           | ✅           |
+| Historie                   | ✅           | ✅           |
+| Dokumentation              | ✅           | ✅           |
+| GPS-Verwaltung             | ✅           | ✅           |
+| Import/Merge               | ✅           | ✅           |
+| Einstellungen              | ✅           | ✅           |
+| Auswertung                 | ✅           | ✅           |
+| **Zulassungs-Suche (BVL)** | ✅           | ❌           |
+| **EPPO/BBCH-Lookup**       | ✅           | ❌           |
+| **BVL-Sync**               | ✅           | ❌           |
+| **Starfield-Animation**    | ❌           | ❌           |
 
 ### Performance-Vorteile
 

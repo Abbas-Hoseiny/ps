@@ -126,57 +126,57 @@ function createSection(
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.creator.label" data-default-label="${escapeAttr(
               labels.calculation.fields.creator.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.creator.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.creator.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.creator.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.creator.label
+  )}" aria-label="Bezeichnung für Feld" />
             <input type="text" class="form-control" id="calc-ersteller" name="calc-ersteller" required data-placeholder-id="calc-form-creator" placeholder="${escapeAttr(
               labels.calculation.fields.creator.placeholder
             )}" aria-label="${escapeAttr(
-              labels.calculation.fields.creator.label
-            )}" value="${escapeAttr(formDefaults.creator || "")}" />
+    labels.calculation.fields.creator.label
+  )}" value="${escapeAttr(formDefaults.creator || "")}" />
           </div>
           <div class="col-md-3">
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.location.label" data-default-label="${escapeAttr(
               labels.calculation.fields.location.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.location.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.location.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.location.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.location.label
+  )}" aria-label="Bezeichnung für Feld" />
             <input type="text" class="form-control" id="calc-standort" name="calc-standort" data-placeholder-id="calc-form-location" placeholder="${escapeAttr(
               labels.calculation.fields.location.placeholder
             )}" aria-label="${escapeAttr(
-              labels.calculation.fields.location.label
-            )}" value="${escapeAttr(formDefaults.location || "")}" />
+    labels.calculation.fields.location.label
+  )}" value="${escapeAttr(formDefaults.location || "")}" />
           </div>
           <div class="col-md-3">
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.crop.label" data-default-label="${escapeAttr(
               labels.calculation.fields.crop.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.crop.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.crop.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.crop.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.crop.label
+  )}" aria-label="Bezeichnung für Feld" />
             <input type="text" class="form-control" id="calc-kultur" name="calc-kultur" data-placeholder-id="calc-form-crop" placeholder="${escapeAttr(
               labels.calculation.fields.crop.placeholder
             )}" aria-label="${escapeAttr(
-              labels.calculation.fields.crop.label
-            )}" value="${escapeAttr(formDefaults.crop || "")}" />
+    labels.calculation.fields.crop.label
+  )}" value="${escapeAttr(formDefaults.crop || "")}" />
           </div>
           <div class="col-md-3">
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.quantity.label" data-default-label="${escapeAttr(
               labels.calculation.fields.quantity.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.quantity.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.quantity.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.quantity.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.quantity.label
+  )}" aria-label="Bezeichnung für Feld" />
             <input type="number" min="0" step="any" class="form-control" id="calc-area-ha" name="calc-area-ha" required data-placeholder-id="calc-form-area" placeholder="${escapeAttr(
               labels.calculation.fields.quantity.placeholder
             )}" aria-label="${escapeAttr(
-              labels.calculation.fields.quantity.label
-            )}" value="${escapeAttr(formDefaults.areaHa || "")}" />
+    labels.calculation.fields.quantity.label
+  )}" value="${escapeAttr(formDefaults.areaHa || "")}" />
           </div>
           <div class="col-md-3">
             <label class="form-label mb-1">Mittelprofil</label>
@@ -189,74 +189,74 @@ function createSection(
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.eppoCode.label" data-default-label="${escapeAttr(
               labels.calculation.fields.eppoCode.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.eppoCode.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.eppoCode.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.eppoCode.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.eppoCode.label
+  )}" aria-label="Bezeichnung für Feld" />
             <input type="text" class="form-control" id="calc-eppo" name="calc-eppo" list="calc-eppo-options" autocomplete="off" data-placeholder-id="calc-form-eppo" placeholder="${escapeAttr(
               labels.calculation.fields.eppoCode.placeholder
             )}" aria-label="${escapeAttr(
-              labels.calculation.fields.eppoCode.label
-            )}" value="${escapeAttr(formDefaults.eppoCode || "")}" />
+    labels.calculation.fields.eppoCode.label
+  )}" value="${escapeAttr(formDefaults.eppoCode || "")}" />
             <datalist id="calc-eppo-options"></datalist>
           </div>
           <div class="col-md-3">
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.bbch.label" data-default-label="${escapeAttr(
               labels.calculation.fields.bbch.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.bbch.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.bbch.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.bbch.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.bbch.label
+  )}" aria-label="Bezeichnung für Feld" />
             <input type="text" class="form-control" id="calc-bbch" name="calc-bbch" list="calc-bbch-options" autocomplete="off" data-placeholder-id="calc-form-bbch" placeholder="${escapeAttr(
               labels.calculation.fields.bbch.placeholder
             )}" aria-label="${escapeAttr(
-              labels.calculation.fields.bbch.label
-            )}" value="${escapeAttr(formDefaults.bbch || "")}" />
+    labels.calculation.fields.bbch.label
+  )}" value="${escapeAttr(formDefaults.bbch || "")}" />
             <datalist id="calc-bbch-options"></datalist>
           </div>
           <div class="col-md-3">
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.invekos.label" data-default-label="${escapeAttr(
               labels.calculation.fields.invekos.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.invekos.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.invekos.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.invekos.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.invekos.label
+  )}" aria-label="Bezeichnung für Feld" />
             <input type="text" class="form-control" id="calc-invekos" name="calc-invekos" data-placeholder-id="calc-form-invekos" placeholder="${escapeAttr(
               labels.calculation.fields.invekos.placeholder
             )}" aria-label="${escapeAttr(
-              labels.calculation.fields.invekos.label
-            )}" value="${escapeAttr(formDefaults.invekos || "")}" />
+    labels.calculation.fields.invekos.label
+  )}" value="${escapeAttr(formDefaults.invekos || "")}" />
           </div>
           <div class="col-md-3">
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.usageType.label" data-default-label="${escapeAttr(
               labels.calculation.fields.usageType.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.usageType.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.usageType.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.usageType.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.usageType.label
+  )}" aria-label="Bezeichnung für Feld" />
             <input type="text" class="form-control" id="calc-verwendung" name="calc-verwendung" required data-placeholder-id="calc-form-usage" placeholder="${escapeAttr(
               labels.calculation.fields.usageType.placeholder
             )}" aria-label="${escapeAttr(
-              labels.calculation.fields.usageType.label
-            )}" value="${escapeAttr(formDefaults.usageType || "")}" />
+    labels.calculation.fields.usageType.label
+  )}" value="${escapeAttr(formDefaults.usageType || "")}" />
           </div>
           <div class="col-md-3">
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.gps.label" data-default-label="${escapeAttr(
               labels.calculation.fields.gps.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.gps.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.gps.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.gps.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.gps.label
+  )}" aria-label="Bezeichnung für Feld" />
             <div class="input-group mb-2">
               <input type="text" class="form-control" id="calc-gps" name="calc-gps" data-placeholder-id="calc-form-gps" placeholder="${escapeAttr(
                 labels.calculation.fields.gps.placeholder
               )}" aria-label="${escapeAttr(
-                labels.calculation.fields.gps.label
-              )}" value="${escapeAttr(formDefaults.gps || "")}" />
+    labels.calculation.fields.gps.label
+  )}" value="${escapeAttr(formDefaults.gps || "")}" />
               <button type="button" class="btn btn-outline-light" data-action="gps-use-active">Aktiver Punkt</button>
             </div>
             <select class="form-select form-select-sm mb-2" data-role="gps-point-select">
@@ -271,29 +271,29 @@ function createSection(
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.date.label" data-default-label="${escapeAttr(
               labels.calculation.fields.date.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.date.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.date.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.date.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.date.label
+  )}" aria-label="Bezeichnung für Feld" />
             <input type="date" class="form-control" id="calc-datum" name="calc-datum" data-placeholder-id="calc-form-date" placeholder="${escapeAttr(
               labels.calculation.fields.date.placeholder
             )}" aria-label="${escapeAttr(
-              labels.calculation.fields.date.label
-            )}" value="${escapeAttr(formDefaults.date || "")}" />
+    labels.calculation.fields.date.label
+  )}" value="${escapeAttr(formDefaults.date || "")}" />
           </div>
           <div class="col-md-3">
             <input type="text" class="form-control form-control-sm label-editor mb-2" data-label-editor="calculation.fields.time.label" data-default-label="${escapeAttr(
               labels.calculation.fields.time.label
             )}" value="${escapeAttr(
-              labels.calculation.fields.time.label
-            )}" placeholder="${escapeAttr(
-              labels.calculation.fields.time.label
-            )}" aria-label="Bezeichnung für Feld" />
+    labels.calculation.fields.time.label
+  )}" placeholder="${escapeAttr(
+    labels.calculation.fields.time.label
+  )}" aria-label="Bezeichnung für Feld" />
             <input type="time" class="form-control" id="calc-uhrzeit" name="calc-uhrzeit" data-placeholder-id="calc-form-time" placeholder="${escapeAttr(
               labels.calculation.fields.time.placeholder
             )}" aria-label="${escapeAttr(
-              labels.calculation.fields.time.label
-            )}" value="${escapeAttr(formDefaults.time || "")}" />
+    labels.calculation.fields.time.label
+  )}" value="${escapeAttr(formDefaults.time || "")}" />
           </div>
           <div class="col-12 text-center">
             <button type="submit" class="btn btn-success px-4">Berechnen</button>
@@ -822,9 +822,9 @@ export function initCalculation(
     if (form) {
       form.reset();
       form
-        .querySelectorAll<
-          HTMLInputElement | HTMLTextAreaElement
-        >("input:not([type='checkbox']):not([type='button']):not([type='submit']), textarea")
+        .querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+          "input:not([type='checkbox']):not([type='button']):not([type='submit']), textarea"
+        )
         .forEach((field) => {
           field.value = "";
         });
@@ -1142,9 +1142,7 @@ export function initCalculation(
       .trim();
     const rawStandort = (formData.get("calc-standort") || "").toString().trim();
     const rawKultur = (formData.get("calc-kultur") || "").toString().trim();
-    const rawAreaHa = (formData.get("calc-area-ha") || "")
-      .toString()
-      .trim();
+    const rawAreaHa = (formData.get("calc-area-ha") || "").toString().trim();
     const rawEppo = (formData.get("calc-eppo") || "").toString().trim();
     const rawBbch = (formData.get("calc-bbch") || "").toString().trim();
     const rawInvekos = (formData.get("calc-invekos") || "").toString().trim();
