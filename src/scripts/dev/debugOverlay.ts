@@ -323,19 +323,8 @@ function metricsFromSlice(
 }
 
 function metricsFromZulassung(state: AppState): ProviderMetrics | null {
-  const result = state.zulassung?.results;
-  if (!result) {
-    return null;
-  }
-  return {
-    items: Array.isArray(result.items) ? result.items.length : null,
-    totalCount:
-      typeof result.totalCount === "number" ? result.totalCount : null,
-    cursor: result.hasMore ? `${result.page + 1}` : null,
-    payloadKb: estimatePayloadKb(result.items),
-    lastUpdated: null,
-    note: result.hasMore ? "Weitere Seiten verfügbar" : null,
-  };
+  // Lite-Version: Zulassung nicht verfügbar
+  return null;
 }
 
 function estimatePayloadKb(value: any): number | null {

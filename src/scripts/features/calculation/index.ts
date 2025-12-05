@@ -31,8 +31,10 @@ import {
 } from "../shared/printing";
 
 // Lite-Version: Lookup-Funktionen deaktiviert (geben leere Ergebnisse zurück)
-const searchEppoSuggestions = async (_term: string, _limit: number) => [];
-const searchBbchSuggestions = async (_term: string, _limit: number) => [];
+type EppoSuggestion = { code: string; name: string; dtcode?: string };
+type BbchSuggestion = { code: string; label: string; principalStage?: number; secondaryStage?: number };
+const searchEppoSuggestions = async (_term: string, _limit: number): Promise<EppoSuggestion[]> => [];
+const searchBbchSuggestions = async (_term: string, _limit: number): Promise<BbchSuggestion[]> => [];
 
 interface Services {
   state: {
