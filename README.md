@@ -1,58 +1,68 @@
-# Pflanzenschutz-Aufzeichnung (Lite)
+# Peter Stader Pflanzenschutz
 
-Eine **schlanke Version** der Pflanzenschutz-Web-App, optimiert für ältere und leistungsschwächere Geräte.
+Eine einfache Web-App zur Dokumentation und Berechnung von Pflanzenschutz-Anwendungen.
 
-## 🚀 Was ist anders in der Lite-Version?
+---
 
-| Feature                    | Full-Version | Lite-Version |
-| -------------------------- | ------------ | ------------ |
-| Berechnungs-Modul          | ✅           | ✅           |
-| Historie                   | ✅           | ✅           |
-| Dokumentation              | ✅           | ✅           |
-| GPS-Verwaltung             | ✅           | ✅           |
-| Import/Merge               | ✅           | ✅           |
-| Einstellungen              | ✅           | ✅           |
-| Auswertung                 | ✅           | ✅           |
-| **Zulassungs-Suche (BVL)** | ✅           | ❌           |
-| **EPPO/BBCH-Lookup**       | ✅           | ❌           |
-| **BVL-Sync**               | ✅           | ❌           |
-| **Starfield-Animation**    | ❌           | ❌           |
+## 🌱 Was kann diese App?
 
-### Performance-Vorteile
+### Berechnung
+Berechnen Sie schnell die benötigten Mengen an Pflanzenschutzmitteln basierend auf Ihrer Fläche.
 
-- **~6.000 Zeilen weniger Code** geladen
-- **~47 MB weniger Daten** (keine EPPO/BBCH-Datenbanken)
-- **Keine Hintergrund-Animationen** (kein Canvas-Rendering)
-- **Schnellerer Start** auf älteren Geräten
+### Dokumentation
+Führen Sie ein digitales Protokoll aller Pflanzenschutz-Anwendungen mit Datum, Standort, Kultur und verwendeten Mitteln.
 
-## 💡 Wann sollte ich die Lite-Version nutzen?
+### GPS-Punkte
+Speichern Sie Ihre Standorte und verknüpfen Sie diese mit Ihren Aufzeichnungen.
 
-- Ältere Tablets oder Smartphones
-- Geräte mit wenig RAM (< 2 GB)
-- Langsame Internetverbindungen
-- Wenn du die BVL-Zulassungssuche nicht benötigst
+### Import & Export
+Sichern Sie Ihre Daten als Datei und importieren Sie bestehende Aufzeichnungen.
 
-## 🔧 Entwicklung
+---
 
-```bash
-cd ps
-npm install
-npm run dev    # Startet auf Port 4322
-```
+## 📱 So starten Sie
 
-## 📦 Build
+1. **Öffnen Sie die App** unter: [abbas-hoseiny.github.io/ps](https://abbas-hoseiny.github.io/ps/)
 
-```bash
-npm run build
-```
+2. **Erstellen oder öffnen Sie eine Datenbank**
+   - Klicken Sie auf "Neue Datenbank erstellen" für einen frischen Start
+   - Oder öffnen Sie eine bestehende `.sqlite` oder `.json` Datei
 
-Der Build liegt unter `dist/` und kann auf GitHub Pages oder einem beliebigen Webserver deployed werden.
+3. **Fertig!** Sie können sofort mit der Dokumentation beginnen.
 
-## 🔗 Full-Version
+---
 
-Die vollständige Version mit allen Features findest du unter:
-https://github.com/Abbas-Hoseiny/pestalozzi
+## 💾 Datensicherheit
 
-## Lizenz
+- **Alle Daten bleiben auf Ihrem Gerät** – nichts wird ins Internet übertragen
+- **Offline nutzbar** – nach dem ersten Laden funktioniert die App auch ohne Internet
+- **Regelmäßig exportieren** – sichern Sie Ihre Daten als Datei auf USB-Stick oder Cloud
 
-MIT – Nutzung, Anpassung und Weitergabe sind ausdrücklich erlaubt.
+---
+
+## 🔧 Funktionen im Überblick
+
+| Funktion | Beschreibung |
+|----------|--------------|
+| **Berechnung** | Mittelbedarf pro Fläche berechnen |
+| **Dokumentation** | Alle Anwendungen protokollieren |
+| **Import & Merge** | Daten importieren und zusammenführen |
+| **GPS** | Standorte speichern und verknüpfen |
+| **Einstellungen** | Betriebsdaten und Standardwerte anpassen |
+
+---
+
+## ❓ Hilfe & Support
+
+Bei Fragen wenden Sie sich an:
+
+**Peter Stader Jungpflanzen GmbH**  
+Göldern 20  
+78479 Reichenau  
+📧 info@peterstader.de
+
+---
+
+## 📄 Lizenz
+
+Diese Software ist Open Source und darf frei genutzt werden.
